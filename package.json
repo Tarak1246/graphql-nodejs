@@ -1,0 +1,29 @@
+{
+  "name": "graphql-nodejs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tarak1246/graphql-nodejs.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Tarak1246/graphql-nodejs/issues"
+  },
+  "homepage": "https://github.com/Tarak1246/graphql-nodejs#readme",
+  "dependencies": {
+    "apollo-server": "^3.13.0",
+    "bcryptjs": "^3.0.2",
+    "dotenv": "^16.5.0",
+    "graphql": "^16.10.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.13.2"
+  }
+}
