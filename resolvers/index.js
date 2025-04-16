@@ -3,27 +3,44 @@ const Post = require('../models/post');
 const bcrypt = require('bcryptjs');
 const { generateToken, generateRefreshToken, verifyRefreshToken } = require('../utils/jwt');
 const { requireAuth } = require('../middlewares/auth');
+const { validateUserInput, validateLoginInput } = require('../validators/user');
+const { validatePostInput } = require('../validators/post');
+const { validateObjectId } = require('../validators/common');
 
 module.exports = {
     Query: {
-        users: () => User.find(),
-        posts: () => Post.find(),
-        user: async (_, { id }) => User.findById(id),
-        post: async (_, { id }) => Post.findById(id),
+        users: requireAuth(() => User.find()),
+        posts: requireAuth(() => Post.find()),
+        user: requireAuth(async (_, { id }) => {
+            const { error } = validateObjectId(id);
+            if (error) throw new Error(`Invalid ID: ${error.details[0].message}`);
+            return await User.findById(id);
+        }),
+        post: requireAuth(async (_, { id }) => {
+            const { error } = validateObjectId(id);
+            if (error) throw new Error(`Invalid ID: ${error.details[0].message}`);
+            return await Post.findById(id);
+        }),
     },
 
     Mutation: {
         addUser: async (_, { user }) => {
-            const newUser = new User(user);
+            const { error, value } = validateUserInput(user);
+            if (error) throw new Error(`Invalid input: ${error.details[0].message}`);
+
+            const newUser = new User(value); // use sanitized value
             return await newUser.save();
         },
 
         login: async (_, { credentials }) => {
-            const user = await User.findOne({ email: credentials.email });
+            const { error, value } = validateLoginInput(credentials);
+            if (error) throw new Error(`Invalid login: ${error.details[0].message}`);
+
+            const user = await User.findOne({ email: value.email });
             if (!user) throw new Error('User not found');
 
             const pepper = process.env.PEPPER || '';
-            const valid = await bcrypt.compare(credentials.password + pepper, user.password);
+            const valid = await bcrypt.compare(value.password + pepper, user.password);
             if (!valid) throw new Error('Invalid password');
 
             const token = generateToken(user);
@@ -45,7 +62,10 @@ module.exports = {
         },
 
         addPost: requireAuth(async (_, { post }, context) => {
-            const newPost = new Post(post);
+            const { error, value } = validatePostInput(post);
+            if (error) throw new Error(`Invalid post input: ${error.details[0].message}`);
+
+            const newPost = new Post(value);
             return await newPost.save();
         }),
     },
