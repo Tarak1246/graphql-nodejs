@@ -24,6 +24,7 @@ module.exports = gql`
 
   type AuthPayload {
     token: String!
+    refreshToken: String!
     user: User!
 }
 
@@ -51,6 +52,7 @@ module.exports = gql`
 
 extend type Mutation {
   login(credentials: LoginInput!): AuthPayload
+  refreshToken(token: String!): AuthPayload
 }
 
 `;

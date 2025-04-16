@@ -9,10 +9,18 @@ const server = new ApolloServer({
   typeDefs,
   resolvers,
   context: ({ req }) => {
-    const token = req.headers.authorization?.split('Bearer ')[1];
-    const user = verifyToken(token);
-    return { user };
-  }
+    try {
+      const authHeader = req.headers.authorization || '';
+      const token = authHeader.replace('Bearer ', '');
+      if (!token) return { user: null };
+
+      const user = verifyToken(token);
+      return { user };
+    } catch (err) {
+      console.warn('Token verification failed:', err.message);
+      return { user: null }; // still allow public operations
+    }
+  },
 });
 
 mongoose
